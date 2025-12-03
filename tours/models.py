@@ -1,3 +1,6 @@
+import google as genai
+from django.conf import settings
+
 from django.db import models
 from suppliers.models import Supplier
 from datetime import timedelta
@@ -113,14 +116,43 @@ class Tour(models.Model):
 class TourDay(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='tour_days')
     day_number = models.IntegerField(verbose_name="Ngày thứ")
-    title = models.CharField(max_length=200, verbose_name="Tiêu đề")
-    description = models.TextField(verbose_name="Nội dung chi tiết")
+    title = models.CharField(max_length=200, verbose_name="Tiêu đề (VD: Tham quan Bà Nà Hills)")
+    description = models.TextField(verbose_name="Nội dung chi tiết", blank=True) # Cho phép để trống để AI viết
 
     class Meta:
         ordering = ['day_number']
 
     def __str__(self):
         return f"Ngày {self.day_number}: {self.title}"
+
+    # --- ĐOẠN CODE MAGIC NẰM Ở ĐÂY ---
+    def save(self, *args, **kwargs):
+        # Kiểm tra: Nếu có Tiêu đề nhưng chưa có Nội dung -> Gọi AI
+        if self.title and not self.description:
+            try:
+                # 1. Cấu hình AI
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                model = genai.Client('gemini-1.0')
+
+                # 2. Ra lệnh cho AI (Prompt)
+                prompt = f"""
+                Bạn là một hướng dẫn viên du lịch chuyên nghiệp tại Việt Nam.
+                Hãy viết một đoạn giới thiệu hấp dẫn, lôi cuốn (khoảng 3-4 câu) bằng tiếng Việt cho địa điểm hoặc hoạt động sau: "{self.title}".
+                Văn phong tự nhiên, mời gọi khách du lịch. Không dùng các ký tự markdown (như ** hoặc #).
+                """
+
+                # 3. Chờ AI trả lời
+                response = client.model.generate_content(prompt)
+
+                # 4. Điền câu trả lời vào ô description
+                self.description = response.text
+
+            except Exception as e:
+                # Nếu mạng lỗi hoặc AI bị ốm thì ghi tạm dòng này
+                self.description = f"(Tự động điền lỗi: {str(e)}. Vui lòng nhập tay.)"
+
+        # Lưu dữ liệu như bình thường
+        super().save(*args, **kwargs)
 
 
 # --- QUẢN LÝ DỊCH VỤ ---
