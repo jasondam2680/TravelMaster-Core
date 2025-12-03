@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 mt-4">
+        <div>
+            <h2 class="text-primary">{{ tour.title }}</h2>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary">{{ tour.code }}</span>
+                {% if tour.status == 'CONF' %}
+                    <span class="badge bg-success">Đã chốt</span>
+                {% elif tour.status == 'CAN' %}
+                    <span class="badge bg-danger">Đã hủy</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Bản nháp</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-end">
+            <a href="{% url 'tour_quotation' tour.pk %}" target="_blank" class="btn btn-warning shadow-sm mb-2">
+                🖨️ Xuất Báo Giá Khách
+            </a>
+            <p class="mb-0">Ngày đi: <strong>{{ tour.start_date|date:"d/m/Y" }}</strong></p>
+            <p class="mb-0">Thời gian: <strong>{{ tour.days }} ngày</strong></p>
+            <p class="mb-0">Số khách: <strong>{{ tour.guest_count }} pax</strong></p>
+        </div>
+    </div>
+
+    <h4 class="text-muted mb-3">Chi tiết dịch vụ & Báo giá</h4>
+    <div class="card shadow-sm mb-5">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ngày sử dụng</th>
+                    <th>Dịch vụ</th>
+                    <th>Nhà cung cấp</th>
+                    <th class="text-center">SL</th>
+                    <th class="money text-end">Giá Net (VND)</th>
+                    <th class="money text-end">Thành tiền Net</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in services %}
+                <tr>
+                    <td>
+                        {{ item.service_date|date:"d/m" }}
+                        {% if item.end_date %}
+                            <br><small class="text-muted text-nowrap">đến {{ item.end_date|date:"d/m" }}</small>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <strong>{{ item.service_name }}</strong>
+                        {% if item.supplier.type == 'HTL' %}
+                            <br><small class="text-muted">({{ item.days_duration }} đêm)</small>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if item.supplier %}
+                            <a href="{% url 'supplier_detail' item.supplier.pk %}" class="text-decoration-none">
+                                {{ item.supplier.name }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">---</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center">{{ item.quantity }}</td>
+
+                    <td class="money text-end">{{ item.price_net|intcomma }}</td>
+
+                    <td class="money text-end fw-bold text-secondary">{{ item.total_net|intcomma }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">Chưa có dịch vụ nào trong tour này.</td></tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot class="total-row" style="background-color: #f8f9fa; border-top: 2px solid #333;">
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">TỔNG CHI PHÍ (NET):</td>
+                    <td class="money text-end text-danger fw-bold fs-5">{{ tour.total_cost|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-end fw-bold">TỔNG THU (GIÁ BÁN):</td>
+                    <td class="money text-end text-primary fw-bold fs-5">{{ tour.total_price|intcomma }}</td>
+                </tr>
+                <tr style="background-color: #e8f5e9;">
+                    <td colspan="5" class="text-end fw-bold text-success">LỢI NHUẬN DỰ KIẾN:</td>
+                    <td class="money text-end text-success fw-bold fs-5">{{ tour.profit|intcomma }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mt-5 mb-5">
+        <h4 class="text-success border-bottom pb-2">Khu vực Điều hành & Booking</h4>
+        <div class="row">
+            {% regroup services by supplier as supplier_list %}
+            {% for supplier_group in supplier_list %}
+            {% if supplier_group.grouper %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">{{ supplier_group.grouper.name }}</h5>
+                        <p class="card-text small text-muted">
+                            Loại hình: {{ supplier_group.grouper.get_type_display }}<br>
+                            Liên hệ: {{ supplier_group.grouper.agent_contact }}
+                        </p>
+                        <a href="{% url 'booking_order' tour.pk supplier_group.grouper.pk %}"
+                           target="_blank"
+                           class="btn btn-outline-success btn-sm w-100">
+                           📄 Tạo Booking Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Order - {{ supplier.name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.5; color: #333; max-width: 210mm; margin: 0 auto; padding: 20px; }
+
+        .header { border-bottom: 2px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        .booking-title { text-align: center; margin-bottom: 30px; text-transform: uppercase; color: #28a745; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #e9ecef; border-bottom: 2px solid #ccc; padding: 10px; text-align: left; }
+        td { border-bottom: 1px solid #eee; padding: 10px; }
+
+        .no-print { position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <a href="javascript:window.print()" class="no-print">🖨️ In / Lưu PDF</a>
+
+    <div class="header">
+        <div>
+            <h2 style="margin:0; color:#28a745">{{ my_company.name }}</h2>
+            <small>Hotline: {{ my_company.phone }} | Email: {{ my_company.email }}</small>
+        </div>
+        <div style="text-align: right;">
+            <strong>Kính gửi: {{ supplier.name }}</strong><br>
+            Attn: {{ supplier.agent_contact }}<br>
+            SĐT: {{ supplier.landline }}
+        </div>
+    </div>
+
+    <div class="booking-title">
+        <h1>Phiếu Đặt Dịch Vụ (Booking Order)</h1>
+        <p>Mã đoàn: <strong>{{ tour.code }}</strong> | Ngày đi: {{ tour.start_date|date:"d/m/Y" }}</p>
+    </div>
+
+    <p>Xin chào quý đối tác, <strong>{{ my_company.name }}</strong> xin gửi yêu cầu đặt dịch vụ chi tiết như sau:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Ngày sử dụng</th>
+                <th>Tên dịch vụ</th>
+                <th>Số lượng</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in services %}
+            <tr>
+                <td>Ngày {{ item.day_number }}</td>
+                <td>
+                    <strong>{{ item.service_name }}</strong>
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; border: 1px dashed #ccc; padding: 15px;">
+        <strong>Lưu ý quan trọng:</strong>
+        <ul>
+            <li>Vui lòng xác nhận lại tình trạng dịch vụ qua Email hoặc Zalo trong vòng 24h.</li>
+            <li>Thanh toán: <strong>{{ supplier.get_payment_term_display }}</strong>.</li>
+            <li>Hóa đơn VAT: Xuất theo thông tin công ty {{ my_company.name }}.</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+        <div style="text-align: center;">
+            <strong>Xác nhận của {{ supplier.name }}</strong><br>
+            <i>(Ký tên & Đóng dấu)</i>
+        </div>
+        <div style="text-align: center;">
+            <strong>Người đặt dịch vụ</strong><br>
+            <i>(Đã ký)</i><br><br>
+            Jason Đàm
+        </div>
+    </div>
+
+</body>
+</html>

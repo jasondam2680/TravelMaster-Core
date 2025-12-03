@@ -1,0 +1,68 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Transport Order - {{ supplier.name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.5; color: #333; max-width: 210mm; margin: 0 auto; padding: 20px; }
+        .header { border-bottom: 2px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #e9ecef; border-bottom: 2px solid #ccc; padding: 10px; text-align: left; }
+        td { border-bottom: 1px solid #eee; padding: 10px; }
+        .no-print { position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <a href="javascript:window.print()" class="no-print">🖨️ In / Lưu PDF</a>
+
+    <div class="header">
+        <div><h2 style="margin:0; color:#28a745">{{ my_company.name }}</h2><small>Hotline: {{ my_company.phone }}</small></div>
+        <div style="text-align: right;"><strong>Kính gửi: {{ supplier.name }}</strong><br>Attn: {{ supplier.agent_contact }}</div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="text-transform: uppercase; color: #28a745;">LỆNH ĐIỀU XE</h1>
+        <p>Đoàn: <strong>{{ tour.code }}</strong> | Số khách: {{ tour.guest_count }}</p>
+    </div>
+
+    <h3>Lịch trình chi tiết</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%">Ngày</th>
+                <th style="width: 40%">Lộ trình / Loại xe</th>
+                <th style="width: 10%">SL Xe</th>
+                <th style="width: 35%">Thông tin đón (Giờ & Điểm đón)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in services %}
+            <tr>
+                <td><strong>{{ item.service_date|date:"d/m/Y" }}</strong></td>
+                <td>
+                    <div style="font-weight: bold; font-size: 1.1em">{{ item.service_name }}</div>
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td>
+                    Giờ: .......................................<br>
+                    Tại: ........................................
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 20px; padding: 10px; background-color: #f9f9f9; border: 1px dashed #999;">
+        <strong>LƯU Ý LÁI XE:</strong> Vui lòng có mặt trước 15 phút, xe sạch sẽ, máy lạnh tốt.
+    </div>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+        <div style="text-align: center;"><strong>Xác nhận Nhà xe</strong></div>
+        <div style="text-align: center;"><strong>Người đặt</strong><br>Jason Đàm</div>
+    </div>
+</body>
+</html>
