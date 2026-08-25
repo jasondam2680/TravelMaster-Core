@@ -1,0 +1,297 @@
+[
+  {
+    "model": "scheduling.vehicle",
+    "pk": 1,
+    "fields": {
+      "plate_number": "51B-123.45",
+      "vehicle_type": "limousine_29",
+      "capacity": 29,
+      "source": "internal",
+      "priority": 1,
+      "is_active": true,
+      "notes": "Xe noi bo chinh"
+    }
+  },
+  {
+    "model": "scheduling.vehicle",
+    "pk": 2,
+    "fields": {
+      "plate_number": "51B-234.56",
+      "vehicle_type": "limousine_29",
+      "capacity": 29,
+      "source": "internal",
+      "priority": 2,
+      "is_active": true,
+      "notes": "Xe noi bo thu 2"
+    }
+  },
+  {
+    "model": "scheduling.vehicle",
+    "pk": 3,
+    "fields": {
+      "plate_number": "51B-345.67",
+      "vehicle_type": "limousine_29",
+      "capacity": 29,
+      "source": "internal",
+      "priority": 3,
+      "is_active": true,
+      "notes": "Xe noi bo thu 3"
+    }
+  },
+  {
+    "model": "scheduling.vehicle",
+    "pk": 4,
+    "fields": {
+      "plate_number": "51B-456.78",
+      "vehicle_type": "limousine_29",
+      "capacity": 29,
+      "source": "contract",
+      "priority": 4,
+      "is_active": true,
+      "notes": "Xe hop dong"
+    }
+  },
+  {
+    "model": "scheduling.guide",
+    "pk": 1,
+    "fields": {
+      "full_name": "Nguyen Van A",
+      "phone": "0901234567",
+      "languages": ["zh"],
+      "source": "internal",
+      "priority": 1,
+      "is_active": true,
+      "notes": "HDV Trung chinh"
+    }
+  },
+  {
+    "model": "scheduling.guide",
+    "pk": 2,
+    "fields": {
+      "full_name": "Tran Thi B",
+      "phone": "0912345678",
+      "languages": ["zh"],
+      "source": "internal",
+      "priority": 2,
+      "is_active": true,
+      "notes": "HDV Trung thu 2"
+    }
+  },
+  {
+    "model": "scheduling.guide",
+    "pk": 3,
+    "fields": {
+      "full_name": "Le Van C",
+      "phone": "0923456789",
+      "languages": ["zh"],
+      "source": "freelance",
+      "priority": 3,
+      "is_active": true,
+      "notes": "HDV Trung cong tac"
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 1,
+    "fields": {
+      "group_code": "M25-001",
+      "tour_name": "Mien Bac Co Dien 5N4D",
+      "tour_code": "MBCD-5N",
+      "departure_date": "2025-03-01",
+      "return_date": "2025-03-05",
+      "duration_days": 5,
+      "pax": 20,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 2,
+    "fields": {
+      "group_code": "M25-002",
+      "tour_name": "Ha Long - Ninh Binh 4N3D",
+      "tour_code": "HLNB-4N",
+      "departure_date": "2025-03-03",
+      "return_date": "2025-03-06",
+      "duration_days": 4,
+      "pax": 18,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 3,
+    "fields": {
+      "group_code": "M25-003",
+      "tour_name": "Mien Nam Toan Canh 6N5D",
+      "tour_code": "MNTC-6N",
+      "departure_date": "2025-03-05",
+      "return_date": "2025-03-10",
+      "duration_days": 6,
+      "pax": 22,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 4,
+    "fields": {
+      "group_code": "M25-004",
+      "tour_name": "Ha Noi - Sapa 5N4D",
+      "tour_code": "HNSP-5N",
+      "departure_date": "2025-03-08",
+      "return_date": "2025-03-12",
+      "duration_days": 5,
+      "pax": 15,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 5,
+    "fields": {
+      "group_code": "M25-005",
+      "tour_name": "Hoi An - Da Nang 4N3D",
+      "tour_code": "HADN-4N",
+      "departure_date": "2025-03-10",
+      "return_date": "2025-03-13",
+      "duration_days": 4,
+      "pax": 20,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 6,
+    "fields": {
+      "group_code": "M25-006",
+      "tour_name": "Phu Quoc Nghi Duong 5N4D",
+      "tour_code": "PQND-5N",
+      "departure_date": "2025-03-12",
+      "return_date": "2025-03-16",
+      "duration_days": 5,
+      "pax": 18,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 7,
+    "fields": {
+      "group_code": "M25-007",
+      "tour_name": "Xuyen Viet Bac Nam 10N9D",
+      "tour_code": "XVBN-10N",
+      "departure_date": "2025-03-15",
+      "return_date": "2025-03-24",
+      "duration_days": 10,
+      "pax": 20,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 8,
+    "fields": {
+      "group_code": "M25-008",
+      "tour_name": "Mien Bac Co Dien 5N4D",
+      "tour_code": "MBCD-5N",
+      "departure_date": "2025-03-18",
+      "return_date": "2025-03-22",
+      "duration_days": 5,
+      "pax": 16,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 9,
+    "fields": {
+      "group_code": "M25-009",
+      "tour_name": "Ha Long Bay 3N2D",
+      "tour_code": "HLB-3N",
+      "departure_date": "2025-03-20",
+      "return_date": "2025-03-22",
+      "duration_days": 3,
+      "pax": 25,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 10,
+    "fields": {
+      "group_code": "M25-010",
+      "tour_name": "Hue - Hoi An 5N4D",
+      "tour_code": "HHAN-5N",
+      "departure_date": "2025-03-22",
+      "return_date": "2025-03-26",
+      "duration_days": 5,
+      "pax": 20,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 11,
+    "fields": {
+      "group_code": "M25-011",
+      "tour_name": "Mien Nam Toan Canh 6N5D",
+      "tour_code": "MNTC-6N",
+      "departure_date": "2025-03-25",
+      "return_date": "2025-03-30",
+      "duration_days": 6,
+      "pax": 18,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  },
+  {
+    "model": "scheduling.tourdeparture",
+    "pk": 12,
+    "fields": {
+      "group_code": "M25-012",
+      "tour_name": "Ha Noi City Tour 3N2D",
+      "tour_code": "HNCT-3N",
+      "departure_date": "2025-03-28",
+      "return_date": "2025-03-30",
+      "duration_days": 3,
+      "pax": 20,
+      "language": "zh",
+      "tour_tier": "standard",
+      "status": "pending",
+      "notes": ""
+    }
+  }
+]

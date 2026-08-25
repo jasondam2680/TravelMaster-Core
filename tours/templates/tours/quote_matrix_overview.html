@@ -1,0 +1,292 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành trình tổng quát - {{ tour.code }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm 12mm 10mm 12mm;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            font-family: 'Noto Sans SC', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 11.5px;
+            line-height: 1.35;
+            color: #222;
+            margin: 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .page-container {
+            max-width: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 18px 22px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-radius: 6px;
+        }
+        .title-header {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+        .title-header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+            color: #3b4262;
+            letter-spacing: 1px;
+        }
+        .title-header .sub {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #2b3a55;
+            margin-bottom: 12px;
+        }
+        .matrix-table th {
+            background-color: #384860;
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+            padding: 7px 4px;
+            font-size: 12px;
+            border: 1px solid #2b3a55;
+        }
+        .matrix-table td {
+            border: 1px solid #cbd5e1;
+            padding: 6px 6px;
+            vertical-align: middle;
+            font-size: 11px;
+        }
+        .col-date {
+            width: 6.5%;
+            text-align: center;
+            font-weight: 600;
+            background-color: #fafbfc;
+            white-space: nowrap;
+        }
+        .col-route {
+            width: 11%;
+            text-align: center;
+            font-size: 10.5px;
+            line-height: 1.25;
+            background-color: #fff;
+        }
+        .route-flight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .col-act {
+            width: 17%;
+            line-height: 1.35;
+        }
+        .act-highlight {
+            color: #d92550;
+            font-weight: 600;
+        }
+        .col-meal {
+            width: 4.5%;
+            text-align: center;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+        .meal-included {
+            color: #0d6efd;
+        }
+        .meal-self {
+            color: #e11d48;
+        }
+        .meal-buffet {
+            color: #059669;
+            font-size: 9.5px;
+            line-height: 1.1;
+        }
+        .col-hotel {
+            width: 12%;
+            text-align: center;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 10.5px;
+            background-color: #fafbfc;
+        }
+        .legend-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            font-size: 11px;
+            color: #475569;
+            margin-top: 6px;
+            padding-right: 10px;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .floating-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .btn-action {
+            display: inline-block;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: none;
+        }
+        .btn-print {
+            background-color: #0284c7;
+            color: #fff;
+        }
+        .btn-print:hover {
+            background-color: #0369a1;
+        }
+        .btn-back {
+            background-color: #475569;
+            color: #fff;
+        }
+        .btn-back:hover {
+            background-color: #334155;
+        }
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .page-container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .floating-bar {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-bar">
+        <a href="{% url 'tour_detail' tour.pk %}" class="btn-action btn-back">← Quay lại Tour</a>
+        <button onclick="window.print()" class="btn-action btn-print">🖨️ In / Lưu PDF (A4 Ngang)</button>
+    </div>
+
+    <div class="page-container">
+        <div class="title-header">
+            <h1>{{ tour.title }} {% if tour.days %}{{ tour.days }}天{% if tour.nights %}{{ tour.nights }}晚{% endif %}{% endif %}参考行程</h1>
+            {% if tour.subtitle %}
+            <div class="sub">{{ tour.subtitle }}</div>
+            {% endif %}
+        </div>
+
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th style="width: 7%;">日期<br><span style="font-size:10px;font-weight:normal;">(Ngày)</span></th>
+                    <th style="width: 11%;">行程<br><span style="font-size:10px;font-weight:normal;">(Chặng/Bay)</span></th>
+                    <th style="width: 17%;">上午<br><span style="font-size:10px;font-weight:normal;">(Buổi Sáng)</span></th>
+                    <th style="width: 17%;">下午<br><span style="font-size:10px;font-weight:normal;">(Buổi Chiều)</span></th>
+                    <th style="width: 15%;">晚上<br><span style="font-size:10px;font-weight:normal;">(Buổi Tối)</span></th>
+                    <th style="width: 4.5%;">早餐<br><span style="font-size:10px;font-weight:normal;">(Sáng)</span></th>
+                    <th style="width: 5%;">午餐<br><span style="font-size:10px;font-weight:normal;">(Trưa)</span></th>
+                    <th style="width: 4.5%;">晚餐<br><span style="font-size:10px;font-weight:normal;">(Tối)</span></th>
+                    <th style="width: 13%;">住宿<br><span style="font-size:10px;font-weight:normal;">(Khách sạn)</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in tour_days %}
+                <tr>
+                    <td class="col-date">
+                        <strong>{% if day.day_date_str %}{{ day.day_date_str }}{% else %}Ngày {{ day.day_number }}{% endif %}</strong>
+                    </td>
+                    <td class="col-route">
+                        {{ day.routing_flight|default:"---" }}
+                    </td>
+                    <td class="col-act">
+                        {{ day.morning_desc|default:day.title|default:"---" }}
+                    </td>
+                    <td class="col-act">
+                        {{ day.afternoon_desc|default:"---" }}
+                    </td>
+                    <td class="col-act">
+                        {{ day.evening_desc|default:"---" }}
+                    </td>
+                    <td class="col-meal">
+                        {% if day.meal_breakfast == '含' or day.meal_breakfast == '✓' or day.meal_breakfast == 'INCLUDED' %}
+                            <span class="meal-included">早</span>
+                        {% elif '自助' in day.meal_breakfast or day.meal_breakfast == 'HOTEL_BUFFET' %}
+                            <span class="meal-buffet">酒店<br>自助</span>
+                        {% elif day.meal_breakfast == '自理' or day.meal_breakfast == '自费' or day.meal_breakfast == '✖' or day.meal_breakfast == 'SELF_PAID' or day.meal_breakfast == 'X' %}
+                            <span class="meal-self">✖</span>
+                        {% else %}
+                            {{ day.meal_breakfast|default:"早" }}
+                        {% endif %}
+                    </td>
+                    <td class="col-meal">
+                        {% if day.meal_lunch == '含' or day.meal_lunch == '✓' or day.meal_lunch == 'INCLUDED' %}
+                            <span class="meal-included">✓</span>
+                        {% elif '自助' in day.meal_lunch or day.meal_lunch == 'BUFFET' %}
+                            <span class="meal-buffet">自助餐</span>
+                        {% elif day.meal_lunch == '自理' or day.meal_lunch == '自费' or day.meal_lunch == '✖' or day.meal_lunch == 'SELF_PAID' or day.meal_lunch == 'X' %}
+                            <span class="meal-self">✖</span>
+                        {% else %}
+                            {{ day.meal_lunch|default:"✓" }}
+                        {% endif %}
+                    </td>
+                    <td class="col-meal">
+                        {% if day.meal_dinner == '含' or day.meal_dinner == '✓' or day.meal_dinner == 'INCLUDED' %}
+                            <span class="meal-included">✓</span>
+                        {% elif '自助' in day.meal_dinner or day.meal_dinner == 'BUFFET' %}
+                            <span class="meal-buffet">自助餐</span>
+                        {% elif day.meal_dinner == '自理' or day.meal_dinner == '自费' or day.meal_dinner == '✖' or day.meal_dinner == 'SELF_PAID' or day.meal_dinner == 'X' %}
+                            <span class="meal-self">✖</span>
+                        {% else %}
+                            {{ day.meal_dinner|default:"✖" }}
+                        {% endif %}
+                    </td>
+                    <td class="col-hotel">
+                        {{ day.hotel_name|default:"---" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="text-align:center; padding: 25px; color: #94a3b8;">
+                        Chưa có dữ liệu lịch trình ma trận. Vui lòng cập nhật thông tin trong trang quản trị Tour.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="legend-footer">
+            <div class="legend-item"><strong style="color:#0d6efd;">✓</strong> 包含 (Đã bao gồm)</div>
+            <div class="legend-item"><strong style="color:#059669;">自助餐</strong> 酒店/餐厅自助餐 (Buffet)</div>
+            <div class="legend-item"><strong style="color:#e11d48;">✖</strong> 自理 / 自费 (Tự túc)</div>
+        </div>
+    </div>
+
+</body>
+</html>

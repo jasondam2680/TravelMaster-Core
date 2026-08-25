@@ -1,0 +1,115 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Báo giá - {{ tour.code }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.5; color: #333; max-width: 210mm; margin: 0 auto; padding: 20px; }
+        .header { border-bottom: 2px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        .company-name { font-size: 24px; font-weight: bold; color: #0056b3; text-transform: uppercase; }
+        .quote-title { text-align: center; margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #f8f9fa; border-bottom: 2px solid #ddd; padding: 12px; text-align: left; font-weight: bold; }
+        td { border-bottom: 1px solid #eee; padding: 12px; vertical-align: top; }
+        .money { text-align: right; white-space: nowrap; }
+        .total-row td { border-top: 2px solid #000; font-weight: bold; font-size: 16px; background-color: #fbfbfb; }
+        .no-print { position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        @media print { .no-print { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <a href="javascript:window.print()" class="no-print">🖨️ In / Lưu PDF</a>
+
+    <div class="header">
+        <div>
+            <div class="company-name">{{ company_name }}</div>
+            <div>Uy tín - Chất lượng - Tận tâm</div>
+        </div>
+        <div style="text-align: right; font-size: 12px;">
+            Hotline: {{ company_phone }}<br>
+            Email: {{ company_email }}
+        </div>
+    </div>
+
+    <div class="quote-title">
+        <h1 style="margin: 0; font-size: 28px;">BẢNG BÁO GIÁ DỊCH VỤ</h1>
+        <div style="font-style: italic; margin-top: 10px;">
+            Chương trình: <strong>{{ tour.title }}</strong><br>
+            Ngày khởi hành: {{ tour.start_date|date:"d/m/Y" }} | Thời gian: {{ tour.days }} ngày
+        </div>
+    </div>
+
+    <div style="margin-bottom: 40px;">
+        <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #0056b3;">I. CHƯƠNG TRÌNH CHI TIẾT</h3>
+        {% for day in tour.tour_days.all %}
+        <div style="margin-bottom: 20px;">
+            <div style="background-color: #f1f8ff; padding: 8px 15px; border-left: 5px solid #0056b3; font-weight: bold;">
+                NGÀY {{ day.day_number }}: {{ day.title }}
+            </div>
+            <div style="padding: 10px 15px; text-align: justify; white-space: pre-line;">
+                {{ day.description }}
+            </div>
+        </div>
+        {% empty %}
+        <p style="color:#999">(Đang cập nhật lịch trình...)</p>
+        {% endfor %}
+    </div>
+
+    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px; color: #0056b3;">II. CHI TIẾT DỊCH VỤ BAO GỒM</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%">Ngày sử dụng</th>
+                <th style="width: 50%">Dịch vụ / Tiêu chuẩn</th>
+                <th style="width: 15%" class="text-center">Số lượng</th>
+                <th style="width: 15%">Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in services %}
+            <tr>
+                <td>
+                    {{ item.service_date|date:"d/m/Y" }}
+                    {% if item.end_date %}
+                    <br><small class="text-muted">đến {{ item.end_date|date:"d/m/Y" }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <strong>{{ item.service_name }}</strong><br>
+                    {% if item.supplier.type == 'HTL' %}
+                        <small>({{ item.days_duration }} đêm)</small>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="font-style: italic; color: #666;">Đã bao gồm</td>
+            </tr>
+            {% endfor %}
+
+            <tr class="total-row">
+                <td colspan="2" style="text-align: right; padding-right: 20px;">TỔNG GIÁ TRỌN GÓI:</td>
+                <td colspan="2" class="money" style="color: #d9534f; font-size: 18px;">
+                    {{ tour.total_price|intcomma }} VND
+                </td>
+            </tr>
+            <tr style="background-color: #e3f2fd;">
+                <td colspan="2" style="text-align: right; padding-right: 20px; font-weight: bold;">GIÁ / KHÁCH:</td>
+                <td colspan="2" class="money" style="color: #0d6efd; font-weight: bold;">
+                    {{ tour.price_per_pax|intcomma }} VND
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-between; page-break-inside: avoid;">
+        <div style="text-align: center; width: 40%;">
+            <strong>Đại diện Khách hàng</strong><br>(Ký tên)
+        </div>
+        <div style="text-align: center; width: 40%;">
+            <strong>Đại diện {{ company_name }}</strong><br>Jason Đàm
+        </div>
+    </div>
+</body>
+</html>

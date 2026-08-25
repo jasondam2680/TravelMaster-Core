@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+    <!-- Header Thông tin Tour -->
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4 mt-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-secondary fs-6">{{ tour.code }}</span>
+                {% if tour.group_code %}
+                    <span class="badge bg-info text-dark fs-6">Đoàn: {{ tour.group_code }}</span>
+                {% endif %}
+                {% if tour.status == 'CONF' %}
+                    <span class="badge bg-success fs-6">Đã chốt</span>
+                {% elif tour.status == 'CAN' %}
+                    <span class="badge bg-danger fs-6">Đã hủy</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark fs-6">Bản nháp</span>
+                {% endif %}
+            </div>
+            <h2 class="text-primary mb-0">{{ tour.title }}</h2>
+            {% if tour.subtitle %}
+                <small class="text-muted fs-6">{{ tour.subtitle }}</small>
+            {% endif %}
+        </div>
+
+        <div class="text-end">
+            <a href="/admin/tours/tour/{{ tour.pk }}/change/" class="btn btn-outline-secondary btn-sm mb-2">
+                ✏️ Chỉnh sửa dữ liệu Tour
+            </a>
+            <p class="mb-0 small text-muted">Ngày đi: <strong>{{ tour.start_date|date:"d/m/Y" }}</strong> | Thời gian: <strong>{{ tour.days }} ngày</strong></p>
+            <p class="mb-0 small text-muted">Số khách: <strong>{{ tour.guest_count }} pax</strong> {% if tour.guest_detail %}({{ tour.guest_detail }}){% endif %}</p>
+        </div>
+    </div>
+
+    <!-- WORKFLOW BÁO GIÁ 4 BƯỚC -->
+    <div class="card border-primary shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+            <strong class="fs-6">⚡ QUY TRÌNH BÁO GIÁ 4 BƯỚC (QUOTATION WORKFLOW)</strong>
+            <span class="badge bg-white text-primary">TravelMaster Suite</span>
+        </div>
+        <div class="card-body">
+            <div class="row g-3 text-center">
+                <!-- Bước 1 -->
+                <div class="col-md-4">
+                    <div class="p-3 border rounded h-100 bg-light d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="badge bg-primary mb-2">BƯỚC 1</div>
+                            <h5 class="fw-bold text-dark">Hành trình tổng quát</h5>
+                            <p class="small text-muted mb-3">Ma trận tóm tắt Ngày, Chặng bay, Sáng / Chiều / Tối, Bữa ăn & Khách sạn để khách chọn & chốt khung tour.</p>
+                        </div>
+                        <a href="{% url 'quote_matrix_overview' tour.pk %}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold">
+                            📊 Xuất Hành Trình Ma Trận &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Bước 2 -->
+                <div class="col-md-4">
+                    <div class="p-3 border rounded h-100 bg-light d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="badge bg-success mb-2">BƯỚC 2</div>
+                            <h5 class="fw-bold text-dark">Bảng chi phí tạm tính</h5>
+                            <p class="small text-muted mb-3">Dự toán chi phí từng dịch vụ (Vé máy bay, KS, Landtour, Xe...), tự động tính Tổng tiền, Cọc và Số dư.</p>
+                        </div>
+                        <a href="{% url 'quote_costing_sheet' tour.pk %}" target="_blank" class="btn btn-outline-success btn-sm fw-bold">
+                            💰 Xuất Bảng Chi Phí Tạm Tính &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Bước 3 & 4 -->
+                <div class="col-md-4">
+                    <div class="p-3 border rounded h-100 bg-light d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="badge bg-info text-dark mb-2">BƯỚC 3 & 4</div>
+                            <h5 class="fw-bold text-dark">Báo giá Tour chi tiết</h5>
+                            <p class="small text-muted mb-3">Brochure hoàn chỉnh gồm bài viết từng ngày, tiêu chuẩn dịch vụ, điều khoản và xuất file PDF chuẩn mẫu.</p>
+                        </div>
+                        <a href="{% url 'quote_proposal_brochure' tour.pk %}" target="_blank" class="btn btn-outline-info text-dark btn-sm fw-bold">
+                            📑 Xuất Brochure & Báo Giá &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tóm tắt Thông tin Điều hành & Tài chính -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted fw-bold">THÔNG TIN BÁO GIÁ</h6>
+                    <div class="small">
+                        <div><strong>Người báo giá:</strong> {{ tour.quoter_name }} ({{ tour.quoter_phone }})</div>
+                        <div><strong>Khách hàng:</strong> {{ tour.customer_name|default:"---" }}</div>
+                        <div><strong>Thời hạn báo giá:</strong> {{ tour.valid_until|date:"d/m/Y"|default:"---" }}</div>
+                        <div><strong>Loại xe:</strong> {{ tour.vehicle_info }} | <strong>HDV:</strong> {{ tour.guide_info }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100 bg-light">
+                <div class="card-body d-flex align-items-center justify-content-around text-center">
+                    <div>
+                        <span class="text-muted small">TỔNG CHI PHÍ NET</span>
+                        <h4 class="text-danger fw-bold mb-0">{{ tour.total_cost|intcomma }} {{ tour.currency }}</h4>
+                    </div>
+                    <div class="border-end h-75"></div>
+                    <div>
+                        <span class="text-muted small">TỔNG GIÁ BÁN</span>
+                        <h4 class="text-primary fw-bold mb-0">{{ tour.total_price|intcomma }} {{ tour.currency }}</h4>
+                        <small class="text-muted">({{ tour.price_per_pax|intcomma }} {{ tour.currency }}/khách)</small>
+                    </div>
+                    <div class="border-end h-75"></div>
+                    <div>
+                        <span class="text-muted small">ĐẶT CỌC</span>
+                        <h5 class="text-warning text-dark fw-bold mb-0">{{ tour.deposit_amount|intcomma }} {{ tour.currency }}</h5>
+                    </div>
+                    <div class="border-end h-75"></div>
+                    <div>
+                        <span class="text-muted small">CÒN LẠI PHẢI THU</span>
+                        <h5 class="text-success fw-bold mb-0">{{ tour.balance_receivable|intcomma }} {{ tour.currency }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng Chi tiết dịch vụ & Phân tích Tài chính (Báo Giá vs Chi Phí NCC) -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark mb-0">1. Chi tiết dịch vụ & Bóc tách giá vốn (Báo giá vs Chi phí NCC)</h4>
+        <a href="/admin/tours/tour/{{ tour.pk }}/change/" class="btn btn-outline-primary btn-sm">
+            ⚙️ Quản lý & Thêm dịch vụ (Admin) &rarr;
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 3%;">#</th>
+                    <th style="width: 22%;">Hạng mục / Dịch vụ</th>
+                    <th class="text-center" style="width: 14%;">Thời gian (Check-in/Out)</th>
+                    <th class="text-center" style="width: 5%;">SL</th>
+                    <th class="text-center" style="width: 5%;">Đêm</th>
+                    <th class="text-end bg-light" style="width: 11%;">Đơn giá báo</th>
+                    <th class="text-end bg-light fw-bold text-primary" style="width: 13%;">Thành tiền báo</th>
+                    <th class="text-end" style="width: 13%;">Tổng chi phí NCC</th>
+                    <th class="text-end text-success fw-bold" style="width: 14%;">Lợi nhuận</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in services %}
+                <tr>
+                    <td><span class="badge bg-light text-dark border">{{ forloop.counter }}</span></td>
+                    <td>
+                        <div class="fw-bold">{{ item.service_name }}</div>
+                        <small class="badge bg-secondary">{{ item.get_category_display }}</small>
+                        {% if item.supplier %}
+                            <small class="text-muted ms-1">| NCC: {{ item.supplier.name }}</small>
+                        {% endif %}
+                        {% if item.category == 'LANDTOUR' and item.sub_costs.exists %}
+                            <span class="badge bg-info text-dark ms-1">Đa NCC ({{ item.sub_costs.count }} khoản)</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center small">
+                        {% if item.check_in %}
+                            {{ item.check_in|date:"d/m/Y" }}
+                            {% if item.check_out %}
+                                <br><span class="text-muted">→ {{ item.check_out|date:"d/m/Y" }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">---</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ item.quantity }}</td>
+                    <td class="text-center"><strong>{{ item.nights|default:1 }}</strong></td>
+                    
+                    <!-- Báo Giá Khách -->
+                    <td class="text-end font-monospace bg-light">
+                        {% if item.unit_price > 0 %}
+                            {{ item.unit_price|intcomma }}
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td class="text-end font-monospace fw-bold text-primary bg-light">
+                        {{ item.total_selling|intcomma }} {{ tour.currency }}
+                    </td>
+
+                    <!-- Chi Phí NCC -->
+                    <td class="text-end font-monospace text-danger">
+                        {{ item.total_supplier_cost|intcomma }} {{ tour.currency }}
+                        {% if item.sub_costs.exists %}
+                            <br><small class="text-muted">({{ item.sub_costs.count }} NCC con)</small>
+                        {% endif %}
+                    </td>
+
+                    <!-- Lợi Nhuận -->
+                    <td class="text-end font-monospace fw-bold {% if item.profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ item.profit|intcomma }} {{ tour.currency }}
+                    </td>
+                </tr>
+
+                <!-- Nếu là Landtour có bóc tách chi phí con -->
+                {% if item.sub_costs.exists %}
+                <tr style="background-color: #f8fafc;">
+                    <td colspan="9" class="p-3">
+                        <div class="card border-info">
+                            <div class="card-header bg-info bg-opacity-10 py-1 d-flex justify-content-between align-items-center">
+                                <strong class="small text-info text-dark">📋 Bóc tách chi phí các Nhà cung cấp con trong gói Landtour:</strong>
+                                <a href="/admin/tours/tourservice/{{ item.pk }}/change/" class="btn btn-sm btn-outline-info py-0" style="font-size: 11px;">
+                                    + Thêm/Sửa NCC con
+                                </a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0 small">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Khoản mục chi phí</th>
+                                            <th>Nhà cung cấp</th>
+                                            <th class="text-center">SL</th>
+                                            <th class="text-center">Số lần/ngày</th>
+                                            <th class="text-end">Đơn giá hợp đồng NCC</th>
+                                            <th class="text-end">Tổng chi phí NCC</th>
+                                            <th>Ghi chú</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sub in item.sub_costs.all %}
+                                        <tr>
+                                            <td style="width: 3%;">{{ forloop.counter }}</td>
+                                            <td style="width: 25%;"><strong>{{ sub.cost_name }}</strong></td>
+                                            <td style="width: 20%;">
+                                                {% if sub.supplier %}
+                                                    <span class="badge bg-light text-dark border">{{ sub.supplier.name }}</span>
+                                                    <small class="text-muted">({{ sub.supplier.get_type_display }})</small>
+                                                {% else %}
+                                                    <span class="text-muted">---</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center" style="width: 6%;">{{ sub.quantity }}</td>
+                                            <td class="text-center" style="width: 8%;">{{ sub.times }}</td>
+                                            <td class="text-end font-monospace" style="width: 15%;">{{ sub.contract_unit_price|intcomma }} {{ tour.currency }}</td>
+                                            <td class="text-end font-monospace fw-bold text-danger" style="width: 15%;">{{ sub.contract_total_price|intcomma }} {{ tour.currency }}</td>
+                                            <td class="text-muted" style="width: 8%;">{{ sub.note|default:"---" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-warning fw-bold">
+                                            <td colspan="6" class="text-end">TỔNG GIÁ VỐN LANDTOUR:</td>
+                                            <td class="text-end font-monospace text-danger">{{ item.total_supplier_cost|intcomma }} {{ tour.currency }}</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% empty %}
+                <tr><td colspan="9" class="text-center py-4 text-muted">Chưa có dịch vụ nào trong tour này.</td></tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-light border-top border-dark">
+                <tr class="fw-bold fs-6">
+                    <td colspan="6" class="text-end text-primary">TỔNG GIÁ BÁN BÁO KHÁCH:</td>
+                    <td class="text-end font-monospace text-primary">{{ tour.total_price|intcomma }} {{ tour.currency }}</td>
+                    <td class="text-end font-monospace text-danger">{{ tour.total_cost|intcomma }} {{ tour.currency }}</td>
+                    <td class="text-end font-monospace text-success">{{ tour.profit|intcomma }} {{ tour.currency }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Bảng Lịch trình từng ngày tóm tắt -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="text-dark mb-0">2. Lịch trình từng ngày ({{ tour_days|length }} ngày)</h4>
+        <a href="{% url 'quote_matrix_overview' tour.pk %}" target="_blank" class="btn btn-outline-primary btn-sm">
+            Xem dạng Ma Trận đầy đủ &rarr;
+        </a>
+    </div>
+    <div class="card shadow-sm mb-5">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 10%;">Ngày</th>
+                    <th style="width: 15%;">Chặng di chuyển</th>
+                    <th style="width: 35%;">Tiêu đề & Hoạt động</th>
+                    <th style="width: 20%;">Khách sạn</th>
+                    <th class="text-center" style="width: 20%;">Bữa ăn (Sáng/Trưa/Tối)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in tour_days %}
+                <tr>
+                    <td><strong>{% if day.day_date_str %}{{ day.day_date_str }}{% else %}Ngày {{ day.day_number }}{% endif %}</strong></td>
+                    <td class="small">{{ day.routing_flight|default:"---" }}</td>
+                    <td>
+                        <strong class="text-primary">{{ day.title }}</strong>
+                        <br><small class="text-muted">{{ day.morning_desc|default:day.description|truncatewords:15 }}</small>
+                    </td>
+                    <td class="small fw-semibold">{{ day.hotel_name|default:"---" }}</td>
+                    <td class="text-center small">
+                        <span class="badge bg-light text-dark border">{{ day.meal_breakfast|default:"早" }}</span>
+                        <span class="badge bg-light text-dark border">{{ day.meal_lunch|default:"✓" }}</span>
+                        <span class="badge bg-light text-dark border">{{ day.meal_dinner|default:"✖" }}</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">Chưa có lịch trình chi tiết.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Khu vực Điều hành & Booking Order cho Nhà Cung Cấp -->
+    <div class="mt-4 mb-5">
+        <h4 class="text-success border-bottom pb-2">3. Khu vực Điều hành & Đặt Dịch Vụ Nhà Cung Cấp</h4>
+        <div class="row">
+            {% regroup services by supplier as supplier_list %}
+            {% for supplier_group in supplier_list %}
+            {% if supplier_group.grouper %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-success shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">{{ supplier_group.grouper.name }}</h5>
+                        <p class="card-text small text-muted">
+                            Loại hình: {{ supplier_group.grouper.get_type_display }}<br>
+                            Liên hệ: {{ supplier_group.grouper.agent_contact }}
+                        </p>
+                        <a href="{% url 'booking_order' tour.pk supplier_group.grouper.pk %}"
+                           target="_blank"
+                           class="btn btn-outline-success btn-sm w-100">
+                           📄 Tạo Booking Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+

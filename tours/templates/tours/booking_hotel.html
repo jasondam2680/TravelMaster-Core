@@ -1,0 +1,80 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotel Booking - {{ supplier.name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: 'Roboto', sans-serif; font-size: 14px; line-height: 1.5; color: #333; max-width: 210mm; margin: 0 auto; padding: 20px; }
+        .header { border-bottom: 2px solid #28a745; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        th { background-color: #e9ecef; border-bottom: 2px solid #ccc; padding: 10px; text-align: left; }
+        td { border-bottom: 1px solid #eee; padding: 10px; }
+        .no-print { position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <a href="javascript:window.print()" class="no-print">🖨️ In / Lưu PDF</a>
+
+    <div class="header">
+        <div>
+            <h2 style="margin:0; color:#28a745">{{ my_company.name }}</h2>
+            <small>Hotline: {{ my_company.phone }}</small>
+        </div>
+        <div style="text-align: right;">
+            <strong>Kính gửi: {{ supplier.name }}</strong><br>Attn: {{ supplier.agent_contact }}
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="text-transform: uppercase; color: #28a745; margin-bottom: 5px;">PHIẾU ĐẶT PHÒNG</h1>
+        <p>Mã đoàn: <strong>{{ tour.code }}</strong> | Tổng khách: <strong>{{ tour.guest_count }} pax</strong></p>
+    </div>
+
+    <h3>1. Chi tiết đặt phòng</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Check-in</th>
+                <th>Check-out</th>
+                <th>Loại phòng</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-center">Số đêm</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in services %}
+            <tr>
+                <td><strong>{{ item.service_date|date:"d/m/Y" }}</strong></td>
+                <td>
+                    {% if item.end_date %}
+                        <strong>{{ item.end_date|date:"d/m/Y" }}</strong>
+                    {% else %}
+                        ---
+                    {% endif %}
+                </td>
+                <td>{{ item.service_name }}</td>
+                <td style="text-align: center; font-weight: bold;">{{ item.quantity }}</td>
+                <td style="text-align: center;">{{ item.days_duration }} đêm</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>2. Danh sách xếp phòng (Rooming List)</h3>
+    <div style="border: 1px solid #ccc; min-height: 150px; padding: 10px;">
+        <p><strong>Yêu cầu setup:</strong></p>
+        <p>- Double (1 giường lớn): .............................. phòng</p>
+        <p>- Twin (2 giường nhỏ): .............................. phòng</p>
+        <p><strong>Ghi chú khác:</strong> ................................................................................</p>
+    </div>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+        <div style="text-align: center;"><strong>Xác nhận của Khách sạn</strong><br><i>(Ký tên & Đóng dấu)</i></div>
+        <div style="text-align: center;"><strong>Người đặt dịch vụ</strong><br>Jason Đàm</div>
+    </div>
+</body>
+</html>

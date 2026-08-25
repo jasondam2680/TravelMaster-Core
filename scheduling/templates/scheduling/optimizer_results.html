@@ -1,0 +1,166 @@
+{% extends "scheduling/base.html" %}
+{% load static %}
+
+{% block title %}Kết quả tối ưu{% endblock %}
+
+{% block extra_css %}
+<style>
+.result-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+.metric-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+.schedule-table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.schedule-table th {
+    background: #4a5568;
+    color: white;
+    padding: 1rem;
+    text-align: left;
+}
+.schedule-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.status-success { color: #48bb78; font-weight: bold; }
+.status-warning { color: #ed8936; font-weight: bold; }
+.conflict-badge {
+    background: #fed7d7;
+    color: #c53030;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Kết quả tối ưu lịch xe/guide</h1>
+        <a href="{% url 'scheduling:dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+            ← Quay lại Dashboard
+        </a>
+    </div>
+
+    {% if result %}
+    <div class="result-summary">
+        <h2 class="text-2xl font-bold mb-4">Tóm tắt tối ưu</h2>
+        <div class="grid grid-cols-4 gap-4">
+            <div>
+                <div class="text-sm opacity-90">Tổng đoàn</div>
+                <div class="text-3xl font-bold">{{ result.total_tours }}</div>
+            </div>
+            <div>
+                <div class="text-sm opacity-90">Đã phân bổ</div>
+                <div class="text-3xl font-bold">{{ result.assigned_tours }}</div>
+            </div>
+            <div>
+                <div class="text-sm opacity-90">Xe sử dụng</div>
+                <div class="text-3xl font-bold">{{ result.vehicles_used }}</div>
+            </div>
+            <div>
+                <div class="text-sm opacity-90">Guide sử dụng</div>
+                <div class="text-3xl font-bold">{{ result.guides_used }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="metric-card">
+            <h3 class="text-lg font-semibold mb-2">Hiệu suất xe</h3>
+            <div class="text-2xl font-bold text-blue-600">{{ result.vehicle_utilization|floatformat:1 }}%</div>
+        </div>
+        <div class="metric-card">
+            <h3 class="text-lg font-semibold mb-2">Hiệu suất guide</h3>
+            <div class="text-2xl font-bold text-green-600">{{ result.guide_utilization|floatformat:1 }}%</div>
+        </div>
+        <div class="metric-card">
+            <h3 class="text-lg font-semibold mb-2">Xung đột</h3>
+            <div class="text-2xl font-bold {% if result.conflicts > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                {{ result.conflicts }}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">Chi tiết phân bổ</h2>
+        <div class="schedule-table">
+            <table class="w-full">
+                <thead>
+                    <tr>
+                        <th>Mã đoàn</th>
+                        <th>Ngày khởi hành</th>
+                        <th>Số ngày</th>
+                        <th>Số khách</th>
+                        <th>Xe</th>
+                        <th>Guide</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in result.assignments %}
+                    <tr>
+                        <td><strong>{{ assignment.tour_code }}</strong></td>
+                        <td>{{ assignment.start_date|date:"d/m/Y" }}</td>
+                        <td>{{ assignment.duration }} ngày</td>
+                        <td>{{ assignment.pax }} pax</td>
+                        <td>{{ assignment.vehicle|default:"<span class='text-red-500'>Chưa gán</span>" }}</td>
+                        <td>{{ assignment.guide|default:"<span class='text-red-500'>Chưa gán</span>" }}</td>
+                        <td>
+                            {% if assignment.status == 'success' %}
+                                <span class="status-success">✓ OK</span>
+                            {% else %}
+                                <span class="status-warning">⚠ Cần kiểm tra</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if result.conflicts > 0 %}
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <h3 class="text-red-800 font-bold mb-2">⚠ Cảnh báo xung đột</h3>
+        <ul class="list-disc list-inside text-red-700">
+            {% for conflict in result.conflict_details %}
+                <li>{{ conflict }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="flex gap-4">
+        <a href="{% url 'scheduling:export_schedule' %}" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded">
+            📥 Xuất lịch CSV
+        </a>
+        <a href="{% url 'scheduling:export_vehicle_calendar' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded">
+            🚐 Lịch xe
+        </a>
+        <a href="{% url 'scheduling:export_guide_calendar' %}" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded">
+            👤 Lịch guide
+        </a>
+    </div>
+
+    {% else %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+        <p class="text-yellow-800">Chưa có kết quả tối ưu. Vui lòng chạy optimizer từ Dashboard.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

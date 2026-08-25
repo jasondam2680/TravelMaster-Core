@@ -1,0 +1,387 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo giá chi phí - {{ tour.code }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm 12mm 10mm 12mm;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            font-family: 'Noto Sans SC', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #222;
+            margin: 0;
+            padding: 15px;
+            background-color: #f4f6f8;
+        }
+        .sheet-container {
+            max-width: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-radius: 4px;
+        }
+        .main-header {
+            text-align: center;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+        .main-header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: #0b3b60;
+            letter-spacing: 2px;
+        }
+        .meta-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 6px 12px;
+            font-size: 11px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .meta-bar .item strong {
+            color: #0b3b60;
+        }
+        .cost-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #0b3b60;
+            margin-bottom: 10px;
+        }
+        .cost-table th {
+            background-color: #1e5c94;
+            color: #ffffff;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 4px;
+            font-size: 11.5px;
+            border: 1px solid #0b3b60;
+        }
+        .cost-table td {
+            border: 1px solid #cbd5e1;
+            padding: 5px 6px;
+            vertical-align: middle;
+            font-size: 10.5px;
+        }
+        .col-idx {
+            width: 3.5%;
+            text-align: center;
+            font-weight: 700;
+            background-color: #fafbfc;
+        }
+        .col-srv {
+            width: 20%;
+            font-weight: 600;
+        }
+        .col-desc {
+            width: 27%;
+            line-height: 1.35;
+        }
+        .col-qty {
+            width: 4.5%;
+            text-align: center;
+        }
+        .col-night {
+            width: 4.5%;
+            text-align: center;
+        }
+        .col-price {
+            width: 9%;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .col-total {
+            width: 11%;
+            text-align: right;
+            font-weight: 700;
+            white-space: nowrap;
+            color: #0f172a;
+        }
+        .col-note {
+            width: 20.5%;
+            font-size: 10px;
+            color: #475569;
+            line-height: 1.3;
+        }
+        .note-red {
+            color: #dc2626;
+        }
+
+        /* Footer Section */
+        .summary-section {
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+            margin-top: 6px;
+        }
+        .notes-column {
+            flex: 1.2;
+            border: 1px solid #cbd5e1;
+            background-color: #fafbfc;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 10px;
+            line-height: 1.45;
+        }
+        .notes-column h4 {
+            margin: 0 0 4px 0;
+            font-size: 11px;
+            color: #0b3b60;
+            font-weight: 700;
+        }
+        .notes-column ul {
+            margin: 0;
+            padding-left: 15px;
+        }
+        .notes-column li {
+            margin-bottom: 2px;
+        }
+        .totals-column {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .total-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 3px;
+        }
+        .box-total {
+            background-color: #0d47a1;
+            color: #fff;
+        }
+        .box-total .label {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .box-total .val {
+            font-size: 15px;
+            font-weight: 800;
+        }
+        .box-deposit {
+            background-color: #1e5c94;
+            color: #fff;
+        }
+        .box-deposit .label {
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .box-deposit .val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffcdd2;
+        }
+        .box-balance {
+            background-color: #b45309;
+            color: #fff;
+        }
+        .box-balance .label {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .box-balance .val {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fef08a;
+        }
+        .explanation-box {
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 5px 8px;
+            font-size: 9.5px;
+            color: #64748b;
+            line-height: 1.3;
+            border-radius: 3px;
+            margin-top: 2px;
+        }
+        .floating-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .btn-action {
+            display: inline-block;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: none;
+        }
+        .btn-print {
+            background-color: #0284c7;
+            color: #fff;
+        }
+        .btn-print:hover {
+            background-color: #0369a1;
+        }
+        .btn-back {
+            background-color: #475569;
+            color: #fff;
+        }
+        .btn-back:hover {
+            background-color: #334155;
+        }
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .sheet-container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .floating-bar {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-bar">
+        <a href="{% url 'tour_detail' tour.pk %}" class="btn-action btn-back">← Quay lại Tour</a>
+        <button onclick="window.print()" class="btn-action btn-print">🖨️ In / Lưu PDF (A4 Ngang)</button>
+    </div>
+
+    <div class="sheet-container">
+        <div class="main-header">
+            <h1>{{ tour.company_name|default:"新鸿泰旅游" }} - 报价单 (BẢNG BÁO GIÁ DỊCH VỤ)</h1>
+        </div>
+
+        <div class="meta-bar">
+            <div class="item"><strong>报价人 (Người báo giá):</strong> {{ tour.quoter_name }}</div>
+            <div class="item"><strong>电话 (SĐT):</strong> {{ tour.quoter_phone }}</div>
+            <div class="item"><strong>有效期至 (Thời hạn):</strong> {% if tour.valid_until %}{{ tour.valid_until|date:"Y.m.d" }}{% else %}2024.07.10{% endif %}</div>
+            <div class="item"><strong>报价日期 (Ngày báo giá):</strong> {% if tour.quote_date %}{{ tour.quote_date|date:"Y.m.d" }}{% else %}{{ tour.created_at|date:"Y.m.d" }}{% endif %}</div>
+        </div>
+
+        <table class="cost-table">
+            <thead>
+                <tr>
+                    <th style="width: 3.5%;">项目<br><span style="font-size:9.5px;font-weight:normal;">(STT)</span></th>
+                    <th style="width: 20%;">服务项目<br><span style="font-size:9.5px;font-weight:normal;">(Hạng mục)</span></th>
+                    <th style="width: 27%;">具体内容<br><span style="font-size:9.5px;font-weight:normal;">(Nội dung chi tiết)</span></th>
+                    <th style="width: 4.5%;">数量<br><span style="font-size:9.5px;font-weight:normal;">(SL)</span></th>
+                    <th style="width: 4.5%;">晚数<br><span style="font-size:9.5px;font-weight:normal;">(Đêm/Lần)</span></th>
+                    <th style="width: 9.5%;">单价<br><span style="font-size:9.5px;font-weight:normal;">(Đơn giá)</span></th>
+                    <th style="width: 11%;">总价<br><span style="font-size:9.5px;font-weight:normal;">(Thành tiền)</span></th>
+                    <th style="width: 20%;">备注<br><span style="font-size:9.5px;font-weight:normal;">(Ghi chú)</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in services %}
+                <tr>
+                    <td class="col-idx">{{ forloop.counter }}</td>
+                    <td class="col-srv">
+                        <strong>{{ item.service_name }}</strong>
+                    </td>
+                    <td class="col-desc">
+                        {{ item.detail_content|linebreaksbr }}
+                    </td>
+                    <td class="col-qty">{{ item.quantity }}</td>
+                    <td class="col-night">{% if item.nights > 0 %}{{ item.nights }}{% else %}1{% endif %}</td>
+                    <td class="col-price">
+                        {% if item.effective_unit_price > 0 %}
+                            {{ item.effective_unit_price|intcomma }} {{ tour.currency }}
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td class="col-total">
+                        {{ item.total_amount|intcomma }} {{ tour.currency }}
+                    </td>
+                    <td class="col-note">
+                        {{ item.note|linebreaksbr }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align:center; padding: 25px; color: #94a3b8;">
+                        Chưa có hạng mục chi phí nào. Vui lòng thêm dịch vụ trong trang quản trị Tour.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary-section">
+            <div class="notes-column">
+                <h4>備注說明 (Ghi chú & Điều khoản):</h4>
+                {% if note_lines %}
+                    <ul>
+                        {% for line in note_lines %}
+                            <li>{{ line }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <ul>
+                        <li>上述報價不含餐外的咖啡/飲料/啤酒</li>
+                        <li>上述報價司機服務到20:30結束，其他時間為客人自由活動時間；</li>
+                        <li>上述報價不含任何簽證費用</li>
+                        <li>上述報價不含發票，如需開發票+8%稅金；</li>
+                        <li>上述價格按 {{ tour.guest_detail|default:"12成人 + 01小朋友" }} 核算，如人數變動價格會有波動；</li>
+                        <li>旅遊景點按行程單所描述，超出行程單景點價格另外增加；</li>
+                        <li>門票以外為另外自費項目（摩托車，降落傘，深潛，水滴漫步。。。）</li>
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="totals-column">
+                <div class="total-box box-total">
+                    <span class="label">总费用 (TỔNG CHI PHÍ):</span>
+                    <span class="val">{{ tour.total_price|intcomma }} {{ tour.currency }}</span>
+                </div>
+
+                {% if tour.deposit_amount > 0 %}
+                <div class="total-box box-deposit">
+                    <span class="label">定金 (ĐẶT CỌC):</span>
+                    <span class="val">-{{ tour.currency }}{{ tour.deposit_amount|intcomma }}</span>
+                </div>
+                {% endif %}
+
+                <div class="total-box box-balance">
+                    <span class="label">余款 (CÒN LẠI):</span>
+                    <span class="val">{{ tour.balance_receivable|intcomma }} {{ tour.currency }}</span>
+                </div>
+
+                <div class="explanation-box">
+                    <strong>说明:</strong><br>
+                    1. 此报价按当前人数与指定酒店/机票核算，若人数或航班变动将重新报价。<br>
+                    2. 此报价是到达越南含参团，投保越南本地旅游险，请自行在国内投保出境旅游险。<br>
+                    3. 具体行程请参阅旅游行程单。
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ supplier.name }} - Chi tiết</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+
+    <a href="{% url 'supplier_list' %}" class="btn btn-outline-secondary mb-3">&larr; Quay lại danh sách</a>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>{{ supplier.name }}</h3>
+            <span class="badge bg-warning text-dark">{{ supplier.get_type_display }}</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-muted">Thông tin liên hệ</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Agent:</strong> {{ supplier.agent_contact }}</li>
+                        <li class="list-group-item"><strong>SĐT Bàn:</strong> {{ supplier.landline }}</li>
+                        <li class="list-group-item"><strong>Địa chỉ:</strong> {{ supplier.address }}</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-muted">Thanh toán & Báo giá</h5>
+                    <p><strong>Hình thức:</strong> {{ supplier.get_payment_term_display }}</p>
+                    <div class="alert alert-info">
+                        <strong>Ghi chú:</strong><br>
+                        {{ supplier.quotation_note|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            Ngày tạo: {{ supplier.created_at|date:"d/m/Y" }}
+        </div>
+    </div>
+
+</body>
+</html>

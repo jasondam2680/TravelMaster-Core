@@ -1,0 +1,552 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo giá & Lịch trình Tour - {{ tour.code }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm 15mm 15mm 15mm;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        body {
+            font-family: 'Noto Sans SC', 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            font-size: 11.5px;
+            line-height: 1.5;
+            color: #222;
+            margin: 0;
+            padding: 20px;
+            background-color: #f1f5f9;
+        }
+        .brochure-container {
+            max-width: 210mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 6px;
+        }
+        
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            box-shadow: 0 2px 6px rgba(2,132,199,0.3);
+        }
+        .company-title h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 800;
+            color: #0369a1;
+            letter-spacing: 0.5px;
+        }
+        .company-title .tour-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 2px;
+        }
+        .company-title .slogan {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 1px;
+        }
+        .contact-badge {
+            background-color: #f0f9ff;
+            border: 1.5px solid #bae6fd;
+            border-radius: 20px;
+            padding: 6px 14px;
+            text-align: right;
+            font-size: 11.5px;
+            color: #0369a1;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* Top Overview Table */
+        .overview-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #0284c7;
+            margin-bottom: 18px;
+            font-size: 11.5px;
+        }
+        .overview-table th, .overview-table td {
+            border: 1px solid #7dd3fc;
+            padding: 6px 10px;
+        }
+        .overview-table th {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 700;
+            width: 14%;
+            text-align: center;
+        }
+        .overview-table td {
+            width: 20%;
+            color: #1e293b;
+        }
+        .flight-cell {
+            background-color: #fafbfc;
+            font-family: inherit;
+            line-height: 1.45;
+            padding: 8px 12px;
+        }
+
+        /* Itinerary Table */
+        .itinerary-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #0284c7;
+            margin-bottom: 22px;
+        }
+        .itinerary-table th {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 700;
+            border: 1px solid #7dd3fc;
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .itinerary-table td {
+            border: 1px solid #bae6fd;
+            padding: 10px 10px;
+            vertical-align: middle;
+        }
+        .day-col-date {
+            width: 11%;
+            text-align: center;
+            font-weight: 700;
+            color: #0f172a;
+            background-color: #fafbfc;
+            font-size: 12px;
+            vertical-align: top;
+            padding-top: 14px;
+        }
+        .day-col-content {
+            width: 61%;
+            vertical-align: top;
+            line-height: 1.55;
+        }
+        .day-title-head {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1.5px solid #e2e8f0;
+            text-align: center;
+        }
+        .day-body-text {
+            text-align: justify;
+            color: #334155;
+            font-size: 11px;
+            white-space: pre-line;
+        }
+        .day-col-hotel {
+            width: 14%;
+            text-align: center;
+            font-weight: 600;
+            color: #0369a1;
+            font-size: 11px;
+            line-height: 1.3;
+            background-color: #fafbfc;
+        }
+        .day-col-meal {
+            width: 4.5%;
+            text-align: center;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        /* Section Blocks */
+        .policy-section {
+            margin-top: 25px;
+            page-break-inside: avoid;
+        }
+        .policy-section h3.section-header {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0369a1;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .policy-block {
+            display: flex;
+            border: 1px solid #7dd3fc;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+        .policy-label {
+            width: 15%;
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            text-align: center;
+            border-right: 1px solid #7dd3fc;
+            font-size: 12px;
+        }
+        .policy-content {
+            width: 85%;
+            padding: 10px 14px;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #334155;
+        }
+        .policy-content ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .policy-content li {
+            margin-bottom: 3px;
+        }
+
+        /* Contact Footer Block */
+        .company-footer-card {
+            border: 2px solid #0284c7;
+            border-radius: 6px;
+            padding: 18px 24px;
+            margin-top: 25px;
+            text-align: center;
+            background-color: #f0f9ff;
+            page-break-inside: avoid;
+        }
+        .company-footer-card h3 {
+            margin: 0 0 10px 0;
+            color: #0369a1;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .company-footer-card .detail-row {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #1e293b;
+        }
+
+        /* Floating UI */
+        .floating-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .btn-action {
+            display: inline-block;
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: none;
+        }
+        .btn-print {
+            background-color: #0284c7;
+            color: #fff;
+        }
+        .btn-print:hover {
+            background-color: #0369a1;
+        }
+        .btn-back {
+            background-color: #475569;
+            color: #fff;
+        }
+        .btn-back:hover {
+            background-color: #334155;
+        }
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .brochure-container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            .floating-bar {
+                display: none !important;
+            }
+            tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="floating-bar">
+        <a href="{% url 'tour_detail' tour.pk %}" class="btn-action btn-back">← Quay lại Tour</a>
+        <button onclick="window.print()" class="btn-action btn-print">🖨️ In / Lưu PDF Brochure</button>
+    </div>
+
+    <div class="brochure-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="brand-box">
+                <div class="logo-circle">✈️</div>
+                <div class="company-title">
+                    <h2>{{ tour.company_name|default:"新鸿泰旅游服务公司" }}</h2>
+                    <div class="tour-name">{{ tour.title }}</div>
+                    {% if tour.subtitle %}
+                    <div class="slogan">{{ tour.subtitle }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="contact-badge">
+                电话： {{ tour.company_hotline|default:"0923 381385" }}
+            </div>
+        </div>
+
+        <!-- Tour Group Overview Table -->
+        <table class="overview-table">
+            <tr>
+                <th>出发日期</th>
+                <td>{{ tour.start_date|date:"Y年m月d日" }}</td>
+                <th>团号</th>
+                <td><strong>{{ tour.group_code|default:tour.code }}</strong></td>
+                <th>操作</th>
+                <td>{{ tour.quoter_name|default:"JASON" }}</td>
+            </tr>
+            <tr>
+                <th>人数</th>
+                <td><strong>{{ tour.guest_count }}人</strong> {% if tour.guest_detail %}({{ tour.guest_detail }}){% endif %}</td>
+                <th>房间数</th>
+                <td>{{ tour.room_count_desc|default:"07 间 + 01 加床" }}</td>
+                <th>领队</th>
+                <td>{{ tour.leader_info|default:"---" }}</td>
+            </tr>
+            <tr>
+                <th>团体性质</th>
+                <td>{{ tour.tour_type|default:"定制团" }}</td>
+                <th>用车</th>
+                <td>{{ tour.vehicle_info|default:"29 座" }}</td>
+                <th>导游</th>
+                <td>{{ tour.guide_info|default:"中文导游" }}</td>
+            </tr>
+            {% if flights_list %}
+            <tr>
+                <th>班机</th>
+                <td colspan="5" class="flight-cell">
+                    {% for flight in flights_list %}
+                        <div>• {{ flight }}</div>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+        </table>
+
+        <!-- Day-by-Day Itinerary Table -->
+        <table class="itinerary-table">
+            <thead>
+                <tr>
+                    <th style="width: 11%;">日期<br><span style="font-size:9.5px;font-weight:normal;">(Ngày)</span></th>
+                    <th style="width: 61%;">行程<br><span style="font-size:9.5px;font-weight:normal;">(Chương trình chi tiết)</span></th>
+                    <th style="width: 14%;">住宿酒店<br><span style="font-size:9.5px;font-weight:normal;">(Khách sạn)</span></th>
+                    <th style="width: 4.5%;">早餐<br><span style="font-size:9.5px;font-weight:normal;">(Sáng)</span></th>
+                    <th style="width: 4.5%;">午餐<br><span style="font-size:9.5px;font-weight:normal;">(Trưa)</span></th>
+                    <th style="width: 5%;">晚餐<br><span style="font-size:9.5px;font-weight:normal;">(Tối)</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in tour_days %}
+                <tr>
+                    <td class="day-col-date">
+                        {% if day.day_date_str %}{{ day.day_date_str }}{% else %}Ngày {{ day.day_number }}{% endif %}
+                    </td>
+                    <td class="day-col-content">
+                        <div class="day-title-head">
+                            {{ day.title }}
+                        </div>
+                        <div class="day-body-text">{{ day.description }}</div>
+                    </td>
+                    <td class="day-col-hotel">
+                        {{ day.hotel_name|default:"---" }}
+                    </td>
+                    <td class="day-col-meal">
+                        {{ day.meal_breakfast|default:"酒店早餐" }}
+                    </td>
+                    <td class="day-col-meal">
+                        {{ day.meal_lunch|default:"含" }}
+                    </td>
+                    <td class="day-col-meal">
+                        {{ day.meal_dinner|default:"自理" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align:center; padding: 25px; color: #94a3b8;">
+                        Chưa có lịch trình chi tiết. Vui lòng nhập thông tin các ngày trong trang quản trị Tour.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Service Standards & Products Description Section -->
+        <div class="policy-section">
+            <h3 class="section-header">详细接待标准及产品说明 (Tiêu chuẩn Dịch vụ & Quy định chi tiết)</h3>
+
+            <!-- 1. Hotel Standards -->
+            {% if hotel_standards_list %}
+            <div class="policy-block">
+                <div class="policy-label">酒店<br>(Khách sạn)</div>
+                <div class="policy-content">
+                    <ul>
+                        {% for item in hotel_standards_list %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 2. Inclusions -->
+            <div class="policy-block">
+                <div class="policy-label">地接包含<br>(Bao gồm)</div>
+                <div class="policy-content">
+                    {% if inclusions_list %}
+                        <ul>
+                            {% for item in inclusions_list %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul>
+                            <li>越南15天旅游签 - 另纸签：12位</li>
+                            <li>29座车子服务按行程 到晚餐(20:00)；送回酒店结束行程。</li>
+                            <li>06团餐 + 01自助餐按行程安排。</li>
+                            <li>01首船参观下龙湾 (包船), 01台快艇出海三岛游 （包船）, 01包船湄公河（包船）</li>
+                            <li>门票：行程内所列景点首道门票 ,蹬岛门票。</li>
+                            <li>下龙湾SunWorld女王往返缆车。</li>
+                            <li>蚕岛的20分钟泥浆浴。</li>
+                            <li>当地导游：越南中文导游讲解</li>
+                            <li>矿泉水：每天2瓶/人</li>
+                            <li>当地旅游保险。</li>
+                            <li>司机 – 导游小费。</li>
+                            <li>旅行社操作服务费</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 3. Exclusions -->
+            <div class="policy-block">
+                <div class="policy-label">费用不含<br>(Không bao gồm)</div>
+                <div class="policy-content">
+                    {% if exclusions_list %}
+                        <ul>
+                            {% for item in exclusions_list %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul>
+                            <li>签证费不含 ：寄快递的时间，运费到付，快速通关</li>
+                            <li>在宾馆或者用团餐中个人消费的酒水饮料</li>
+                            <li>出境意外险（客人需在国内自行办理出境意外险的投保）</li>
+                            <li>导游, 司机行程以外的加班费 : 超过规定服务时间（20：00过后）算超时。超时费 ： 75人民币/小时</li>
+                            <li>如出现单人/房，需补房差</li>
+                            <li>团餐以外的餐吃，饮料。</li>
+                            <li>首都門票以外為自費項目，如：海底漫步，摩托車，降落傘，深潛，水滴漫步。。。</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 4. Tips -->
+            <div class="policy-block">
+                <div class="policy-label">温馨提示<br>(Lưu ý thân thiện)</div>
+                <div class="policy-content">
+                    {% if tips_list %}
+                        <ul>
+                            {% for item in tips_list %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul>
+                            <li>自行带好护照签证纸（入住房间需提供）</li>
+                            <li>请自备防晒，防蚊用具</li>
+                            <li>请自备常用药品：如晕车药、晕船药、感冒药、藿香正气水（或藿香正气胶囊）等</li>
+                            <li>旅游行程中，听从导游安排，不得擅自脱团、离团，如有身体不适，及时告知导游，方便及时准确的救治</li>
+                            <li>建议出发前登记您的联系电话及家人的联系方式，方便接团等联系。</li>
+                            <li>本产品行程中有涉及到游泳的活动，请自备游泳装备，陪同人员及监护人看护好不会游泳的人员特别是小孩，注意安全，全程请自行保管好随身携带的贵重物品！</li>
+                            <li>由於個人原因參加不了行程的，費用不能退還。</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 5. Registration Terms -->
+            <div class="policy-block">
+                <div class="policy-label">报名须知<br>(Điều kiện đăng ký)</div>
+                <div class="policy-content">
+                    {% if terms_list %}
+                        <ul>
+                            {% for item in terms_list %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <ul>
+                            <li>本产品不接受75岁以上（含）客人预订。</li>
+                            <li>70-75周岁老年人预订本产品需确保身体健康事宜旅游，并有18周岁以上家属/朋友全程陪同。</li>
+                            <li>18周岁以下未成年人需要至少1名家长（监护人）全程陪同，监护人有责任和义务做好未成年人的安全防范工作</li>
+                            <li>本产品不接受有心血管疾病，脑血管疾病，呼吸系统疾病，精神病，严重贫血病，大中型手术的恢复期病患者，孕妇及行动不便者预订</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Block -->
+        <div class="company-footer-card">
+            <h3>{{ tour.company_name|default:"新鸿泰旅游服务公司" }}</h3>
+            <div class="detail-row"><strong>座机 (Điện thoại bàn):</strong> {{ tour.company_landline|default:"028-62654888" }}</div>
+            <div class="detail-row"><strong>地址 (Địa chỉ):</strong> {{ tour.company_address|default:"306, VANH DAI TRONG, BINH TRI DONG B, BINH TAN, HCM" }}</div>
+            <div class="detail-row"><strong>咨询电话 (Hotline tư vấn):</strong> <span style="font-weight: 700; color: #0284c7;">{{ tour.company_hotline|default:"0923381385 阿昌" }}</span></div>
+        </div>
+    </div>
+
+</body>
+</html>

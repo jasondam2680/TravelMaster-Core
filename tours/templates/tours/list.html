@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-4">
+        <h2 class="text-primary">Quản lý Tour</h2>
+        <a href="/admin/tours/tour/add/" class="btn btn-success">
+            + Tạo Tour Mới
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã Tour</th>
+                    <th>Tên chương trình</th>
+                    <th>Ngày đi</th>
+                    <th>Khách</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Lợi nhuận</th>
+                    <th></th> </tr>
+            </thead>
+            <tbody>
+                {% for tour in tours %}
+                <tr>
+                    <td>
+                        <span class="badge bg-secondary">{{ tour.code }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'tour_detail' tour.pk %}" class="text-decoration-none fw-bold">
+                            {{ tour.title }}
+                        </a>
+                        <br>
+                        <small class="text-muted">{{ tour.days }} ngày</small>
+                    </td>
+                    <td>{{ tour.start_date|date:"d/m/Y" }}</td>
+                    <td>{{ tour.guest_count }} pax</td>
+                    <td>
+                        {% if tour.status == 'CONF' %}
+                            <span class="badge bg-success">Đã chốt</span>
+                        {% elif tour.status == 'CAN' %}
+                            <span class="badge bg-danger">Đã hủy</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Bản nháp</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end fw-bold text-success">
+                        {{ tour.profit|intcomma }}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'tour_detail' tour.pk %}" class="btn btn-sm btn-outline-primary">
+                            Xem chi tiết &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <p class="text-muted">Chưa có tour nào được tạo.</p>
+                        <a href="/admin/tours/tour/add/" class="btn btn-primary">Tạo tour đầu tiên ngay</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
